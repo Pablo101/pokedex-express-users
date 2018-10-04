@@ -156,6 +156,11 @@ const deletePokemon = (request, response) => {
  * ===================================
  */
 
+const usersPokemonsNew = (request, response) => {
+    response.render('/usersPokemons/new')
+}
+
+
 const usersPokemonsCreate = (request, response) => {
    const queryString = 'INSERT INTO users_pokemons (user_id, pokemon_id) VALUES ($1, $2)';
 
@@ -171,10 +176,23 @@ const usersPokemonsCreate = (request, response) => {
    });
  };
 
-
 const userNew = (request, response) => {
   response.render('users/new');
 }
+
+const usersShow = (request, response) => {
+    const queryString = 'Select pokemon.id, pokemon.name FROM pokemon INNER JOIN users_pokemon ON users_pokemons.pokemond_id = pokemon.id WHERE users_pokemons.user_id = ${request.params.id}';
+    pool.query(queryString, (err, result) => {
+     if (err) {
+       console.error('Query error:', err.stack);
+       response.send('Error');
+     } else {
+        response.render('users/user', { pokemons: result.rows});
+   };
+ });
+};
+
+
 
 const userCreate = (request, response) => {
 
@@ -221,8 +239,14 @@ app.delete('/pokemon/:id', deletePokemon);
 
 // TODO: New routes for creating users
 
+app.get('/users_pokemons/new', usersPokemonsNew)
+app.post('/users_pokemons/new', usersPokemonsCreate)
+
+
 app.get('/users/new', userNew);
+app.get('/users/:id', userShow);
 app.post('/users', userCreate);
+
 
 /**
  * ===================================
