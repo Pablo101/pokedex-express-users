@@ -1,4 +1,4 @@
- var React = require("react");
+var React = require("react");
 
  class New extends React.Component {
    render() {
@@ -6,12 +6,12 @@
        <html>
          <head />
          <body>
-           <form method="POST" action="/users">
+           <form method="POST" action="/users_pokemons">
              <div>
-               name:<input name="name" type="text" />
+               User ID:<input name="user_id" type="number" required />
              </div>
              <div>
-               Password:<input name="password" type="password" required />
+               Pokemon ID:<input name="pokemon_id" type="number" required />
              </div>
              <input type="submit" value="Submit" />
            </form>

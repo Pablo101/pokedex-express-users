@@ -8,10 +8,11 @@ CREATE TABLE IF NOT EXISTS pokemon(
 
 CREATE TABLE IF NOT EXISTS users(
 	id serial PRIMARY KEY,
-	name TEXT
+	name TEXT,
+	password TEXT
 );
 
-CREATE TABLE IF NOT EXISTS users_pokemons (
+CREATE TABLE IF NOT EXISTS users_pokemons(
    id SERIAL PRIMARY KEY,
    user_id INTEGER,
    pokemon_id INTEGER

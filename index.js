@@ -11,7 +11,9 @@
 const express = require('express');
 const methodOverride = require('method-override');
 const pg = require('pg');
-
+const sha256 = require('js-sha256');
+const cookieParser = require('cookie-parser');
+const reactEngine = require('express-react-views').createEngine();
 // Initialise postgres client
 const config = {
   user: 'pablo101',
@@ -41,10 +43,10 @@ const app = express();
 
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
+app.use(cookieParser());
 
 
 // Set react-views to be the default view engine
-const reactEngine = require('express-react-views').createEngine();
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jsx');
 app.engine('jsx', reactEngine);
@@ -124,7 +126,7 @@ const editPokemonForm = (request, response) => {
     }
   });
 }
-
+//updating the entered pokemon and trainer id match
 const updatePokemon = (request, response) => {
   let id = request.params['id'];
   let pokemon = request.body;
@@ -160,7 +162,7 @@ const usersPokemonsNew = (request, response) => {
     response.render('/usersPokemons/new')
 }
 
-
+//failed to loop up in here
 const usersPokemonsCreate = (request, response) => {
    const queryString = 'INSERT INTO users_pokemons (user_id, pokemon_id) VALUES ($1, $2)';
 
@@ -175,17 +177,16 @@ const usersPokemonsCreate = (request, response) => {
      }
    });
  };
-
+//form to enter trainer name
 const userNew = (request, response) => {
   response.render('users/new');
 }
-
+//gets users by id rendering the form from users/user & matches pokemon id with trainer id
 const usersShow = (request, response) => {
-    const queryString = 'Select pokemon.id, pokemon.name FROM pokemon INNER JOIN users_pokemon ON users_pokemons.pokemond_id = pokemon.id WHERE users_pokemons.user_id = ${request.params.id}';
-    pool.query(queryString, (err, result) => {
+const queryString = `SELECT pokemon.id, pokemon.name FROM pokemon INNER JOIN users_pokemons ON users_pokemons.pokemon_id = pokemon.id WHERE users_pokemons.user_id = ${request.params.id}`;    pool.query(queryString, (err, result) => {
      if (err) {
        console.error('Query error:', err.stack);
-       response.send('Error');
+       // response.send('Error');
      } else {
         response.render('users/user', { pokemons: result.rows});
    };
@@ -196,7 +197,8 @@ const usersShow = (request, response) => {
 
 const userCreate = (request, response) => {
 
-  const queryString = 'INSERT INTO users (name) VALUES ($1)';
+  const queryString = 'INSERT INTO users (name) VALUES ($1, $2) RETURNING id';
+  const values = [request.body.name, sha256(request.body.password)];
 
   const values = [request.body.name];
 
@@ -213,10 +215,53 @@ const userCreate = (request, response) => {
       console.log('Query result:', result);
 
       // redirect to home page
-      response.redirect('/');
+      // response.redirect('/');
+      response.cookie('userId', result.rows[0].id);
+      response.redirect('/users');
     }
   });
 }
+
+
+const getCookies = (request, response) => {
+    response.send(request.cookies);
+};
+
+const logOut = (request, response) => {
+    response.clearCookie('useId');
+    response.redirect('/');
+}
+
+const getLoginForm = (request, response) => {
+    response.render('auth/login')
+}
+
+const login = (request, response) => {
+    const queryStrin = 'Select * FROM users WHERE nam = '$(request.body.name)'';
+ pool.query(queryString, values, (err, result) => {
+
+    if (err) {
+
+      console.error('Query error:', err.stack);
+      response.send('dang it.');
+    } else {
+      const password = sha256(request.body.password);
+      const userId = result.rows[0].id;
+      console.log('Query result:', result);
+
+      response.cookie('userId', userId);
+      response.redirect('/users/${userId}');
+    }
+  });
+}
+
+
+
+
+
+
+
+
 
 /**
  * ===================================
@@ -225,6 +270,12 @@ const userCreate = (request, response) => {
  */
 
 app.get('/', getRoot);
+
+app.get('/cookies', getCookies)
+app.get('/logout', logOut)
+app.get('/login', getLoginForm)
+app.post('/login', login)
+
 
 app.get('/pokemon/:id/edit', editPokemonForm);
 app.get('/pokemon/new', getNew);
