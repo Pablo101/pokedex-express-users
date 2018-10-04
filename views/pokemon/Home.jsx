@@ -22,3 +22,6 @@ class Home extends React.Component {
 }
 
 module.exports = Home;
+
+
+//displaying all pokemon

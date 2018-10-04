@@ -240,11 +240,11 @@ app.delete('/pokemon/:id', deletePokemon);
 // TODO: New routes for creating users
 
 app.get('/users_pokemons/new', usersPokemonsNew)
-app.post('/users_pokemons/new', usersPokemonsCreate)
+app.post('/users_pokemons', usersPokemonsCreate)
 
 
 app.get('/users/new', userNew);
-app.get('/users/:id', userShow);
+app.get('/users/:id', usersShow);
 app.post('/users', userCreate);
 
 
@@ -257,19 +257,19 @@ const server = app.listen(3000, () => console.log('~~~ Ahoy we go from the port 
 
 
 
-// Handles CTRL-C shutdown
-function shutDown() {
-  console.log('Recalling all ships to harbour...');
-  server.close(() => {
-    console.log('... all ships returned...');
-    pool.end(() => {
-      console.log('... all loot turned in!');
-      process.exit(0);
-    });
-  });
-};
+// // Handles CTRL-C shutdown
+// function shutDown() {
+//   console.log('Recalling all ships to harbour...');
+//   server.close(() => {
+//     console.log('... all ships returned...');
+//     pool.end(() => {
+//       console.log('... all loot turned in!');
+//       process.exit(0);
+//     });
+//   });
+// };
 
-process.on('SIGTERM', shutDown);
-process.on('SIGINT', shutDown);
+// process.on('SIGTERM', shutDown);
+// process.on('SIGINT', shutDown);
 
 
